@@ -1,0 +1,56 @@
+getwd()
+p='C:/Users/Admin/Downloads'
+list.dirs()
+list.files()
+library(readr)
+weight_lift <- read.csv("weightlift.csv")
+View(Weight_lift)
+str(Weight_lift)
+data<-Weight_lift
+pairs(data[1:10])
+library(doParallel)
+cl <- makeCluster(detectCores())
+registerDoParallel()
+set.seed(12345)
+dataTrain<-data[1:4004,]
+dataTest<-data[4005:4024,]
+head(dataTrain)
+head(dataTest)
+indexNA <- as.vector(sapply(dataTrain[,1:140],function(x) {length(which(is.na(x)))!=0}))
+dataTrain <- dataTrain[,!indexNA]
+train_control<- trainControl(method="cv", number=10)
+confusionMatrix<- confusionMatrix(pred$predictions,pred$classe)
+confusionMatrix
+control <- trainControl(method = 'repeatedcv',
+                        number = 10,
+                        repeats = 3,
+                        search = 'grid')
+set.seed(seed)
+tunegrid <- expand.grid(.mtry=c(1:80))
+mtry <- sqrt(ncol(x))
+rf_gridsearch <- train(~., 
+                       data = dataTrain[1:198,],
+                       method = 'rf',
+                       metric = 0,
+                       tuneGrid = tunegrid,
+                       trControl = control)
+
+set.seed(seed)
+metric <- 'Accuracy'
+gbm_mod <- train(pitch_belt~., 
+                 data = dataTrain,
+                 method = 'gbm',
+                 metric = 0,
+                 trControl = control)
+print(gbm_mod)
+plot(gbm_mod)
+
+summary(gbm_mod)
+
+predictions<- predict(gbm_mod,dataTest)
+
+
+pred<- cbind(dataTest,predictions)
+
+confusionMatrix<- confusionMatrix(pred$predictions,pred$classe)
+confusionMatrix
